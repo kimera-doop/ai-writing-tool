@@ -32,7 +32,7 @@ interface KeysContextValue {
 
 const KeysContext = createContext<KeysContextValue | null>(null);
 
-// sessionStorage キー（タブを閉じると消える）
+// localStorage キー（端末に永続保存）
 const SESSION_MASTER = "session_master_pw";
 
 export function KeysProvider({ children }: { children: ReactNode }) {
@@ -47,9 +47,9 @@ export function KeysProvider({ children }: { children: ReactNode }) {
     setGeminiKeySet(!!localStorage.getItem(ENC_GEMINI_STORAGE));
     setNotionTokenSet(!!localStorage.getItem(ENC_NOTION_STORAGE));
 
-    // 外部サイトから戻った後など、sessionStorageにパスワードが残っていれば自動復元
+    // ページ更新・再訪時に localStorage のパスワードで自動復元
     if (has) {
-      const savedPw = sessionStorage.getItem(SESSION_MASTER);
+      const savedPw = localStorage.getItem(SESSION_MASTER);
       if (savedPw) {
         (async () => {
           try {
@@ -59,8 +59,8 @@ export function KeysProvider({ children }: { children: ReactNode }) {
             if (encNotion) setInMemoryNotionToken(await decryptText(encNotion, savedPw));
             setMasterPassword(savedPw);
           } catch {
-            // パスワードが無効なら sessionStorage を削除
-            sessionStorage.removeItem(SESSION_MASTER);
+            // パスワードが無効なら localStorage を削除
+            localStorage.removeItem(SESSION_MASTER);
           }
         })();
       }
@@ -85,12 +85,12 @@ export function KeysProvider({ children }: { children: ReactNode }) {
         setInMemoryNotionToken(token);
       }
       setMasterPassword(password);
-      sessionStorage.setItem(SESSION_MASTER, password);
+      localStorage.setItem(SESSION_MASTER, password);
       return true;
     } catch {
       setInMemoryGeminiKey(null);
       setInMemoryNotionToken(null);
-      sessionStorage.removeItem(SESSION_MASTER);
+      localStorage.removeItem(SESSION_MASTER);
       return false;
     }
   };
@@ -98,7 +98,7 @@ export function KeysProvider({ children }: { children: ReactNode }) {
   /** 初回設定時：新しいマスターパスワードをメモリに保持 */
   const initMasterPassword = (password: string) => {
     setMasterPassword(password);
-    sessionStorage.setItem(SESSION_MASTER, password);
+    localStorage.setItem(SESSION_MASTER, password);
   };
 
   const saveGeminiKey = async (key: string) => {
@@ -125,7 +125,7 @@ export function KeysProvider({ children }: { children: ReactNode }) {
     setGeminiKeySet(false);
     if (!localStorage.getItem(ENC_NOTION_STORAGE)) {
       setHasEncKeys(false);
-      sessionStorage.removeItem(SESSION_MASTER);
+      localStorage.removeItem(SESSION_MASTER);
     }
   };
 
@@ -135,7 +135,7 @@ export function KeysProvider({ children }: { children: ReactNode }) {
     setNotionTokenSet(false);
     if (!localStorage.getItem(ENC_GEMINI_STORAGE)) {
       setHasEncKeys(false);
-      sessionStorage.removeItem(SESSION_MASTER);
+      localStorage.removeItem(SESSION_MASTER);
     }
   };
 

@@ -336,7 +336,7 @@ export default function SettingsPage() {
           <ul className="space-y-2 list-disc list-inside text-blue-600">
             <li>APIキーはAES-256で暗号化されてブラウザに保存されます</li>
             <li>DevToolsで見ても暗号化された文字列のみ表示されます</li>
-            <li>マスターパスワードはどこにも保存されず、ブラウザを閉じると消えます</li>
+            <li>マスターパスワードはこの端末のブラウザにのみ保存されます</li>
             <li>パスワードを忘れた場合はキーを削除して再入力が必要です</li>
           </ul>
         </div>
