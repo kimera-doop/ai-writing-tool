@@ -15,6 +15,7 @@ import {
   ScrollText,
 } from "lucide-react";
 import { getNotionToken } from "@/lib/clientKeys";
+import { useKeys } from "@/components/KeysProvider";
 
 interface NotionDatabase {
   id: string;
@@ -56,6 +57,7 @@ const destinations = [
 
 export default function NotionPage() {
   const router = useRouter();
+  const { notionTokenSet } = useKeys();
   const [activeTab, setActiveTab] = useState<Tab>("databases");
   const [view, setView] = useState<View>("db-list");
   const [contentSource, setContentSource] = useState<"db" | "page">("db");
@@ -152,6 +154,19 @@ export default function NotionPage() {
     fetchDatabases();
     return () => { if (retryTimerRef.current) clearTimeout(retryTimerRef.current); };
   }, [fetchDatabases]);
+
+  // Notionトークンが削除されたとき（リセット時など）に表示をクリア
+  useEffect(() => {
+    if (notionTokenSet) return;
+    setDatabases([]);
+    setPages([]);
+    setSelectedDb(null);
+    setEntries([]);
+    setSelectedEntry(null);
+    setView("db-list");
+    setActiveTab("databases");
+    setError("");
+  }, [notionTokenSet]);
 
   const handleTabChange = (tab: Tab) => {
     setActiveTab(tab);
