@@ -48,9 +48,11 @@ export function KeysProvider({ children }: { children: ReactNode }) {
     setNotionTokenSet(!!localStorage.getItem(ENC_NOTION_STORAGE));
 
     // ページ更新・再訪時に localStorage のパスワードで自動復元
-    if (has) {
-      const savedPw = localStorage.getItem(SESSION_MASTER);
-      if (savedPw) {
+    // APIキー未保存の場合でも復元する（if (has) の外に出す）
+    const savedPw = localStorage.getItem(SESSION_MASTER);
+    if (savedPw) {
+      if (has) {
+        // APIキーが存在する場合は復号も行う
         (async () => {
           try {
             const encGemini = localStorage.getItem(ENC_GEMINI_STORAGE);
@@ -59,10 +61,12 @@ export function KeysProvider({ children }: { children: ReactNode }) {
             if (encNotion) setInMemoryNotionToken(await decryptText(encNotion, savedPw));
             setMasterPassword(savedPw);
           } catch {
-            // パスワードが無効なら localStorage を削除
-            localStorage.removeItem(SESSION_MASTER);
+            // 復号失敗時はパスワードは残しつつロック状態のままにする
           }
         })();
+      } else {
+        // APIキー未保存の場合はパスワードだけ復元する
+        setMasterPassword(savedPw);
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
