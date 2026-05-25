@@ -69,6 +69,20 @@ export function KeysProvider({ children }: { children: ReactNode }) {
         setMasterPassword(savedPw);
       }
     }
+
+    // 他タブでリセットされた場合、このタブも即座にクリアする
+    const handleStorageChange = (e: StorageEvent) => {
+      if (e.key === SESSION_MASTER && e.newValue === null) {
+        setMasterPassword(null);
+        setHasEncKeys(false);
+        setGeminiKeySet(false);
+        setNotionTokenSet(false);
+        setInMemoryGeminiKey(null);
+        setInMemoryNotionToken(null);
+      }
+    };
+    window.addEventListener("storage", handleStorageChange);
+    return () => window.removeEventListener("storage", handleStorageChange);
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
