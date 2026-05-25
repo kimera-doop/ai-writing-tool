@@ -129,6 +129,7 @@ export function KeysProvider({ children }: { children: ReactNode }) {
     setGeminiKeySet(false);
     if (!localStorage.getItem(ENC_NOTION_STORAGE)) {
       setHasEncKeys(false);
+      setMasterPassword(null);
       localStorage.removeItem(SESSION_MASTER);
     }
   };
@@ -139,6 +140,7 @@ export function KeysProvider({ children }: { children: ReactNode }) {
     setNotionTokenSet(false);
     if (!localStorage.getItem(ENC_GEMINI_STORAGE)) {
       setHasEncKeys(false);
+      setMasterPassword(null);
       localStorage.removeItem(SESSION_MASTER);
     }
   };
