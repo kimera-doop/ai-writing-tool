@@ -128,13 +128,13 @@ export default function SettingsPage() {
             マスターパスワード
           </h2>
           <p className="text-sm text-gray-500 mb-4">
-            APIキーを暗号化するためのパスワードです。このパスワード自体は保存されません。ブラウザを開くたびに入力が必要です。
+            APIキーを暗号化するためのパスワードです。この端末のブラウザに保存されるため、ページを更新しても再入力は不要です。
           </p>
 
           {masterPassword ? (
             <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-4 py-3 text-sm text-green-700">
               <CheckCircle size={15} />
-              このセッションでは設定済みです
+              設定済みです（この端末で保持中）
             </div>
           ) : (
             <div className="space-y-3">
