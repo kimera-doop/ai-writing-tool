@@ -44,7 +44,6 @@ export default function UnlockModal() {
           onChange={(e) => setPassword(e.target.value)}
           onKeyDown={(e) => e.key === "Enter" && handleUnlock()}
           placeholder="マスターパスワード"
-          autoFocus
           className="w-full px-4 py-3 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm mb-3"
         />
 

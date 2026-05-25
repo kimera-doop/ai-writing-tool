@@ -19,6 +19,7 @@ import {
   Menu,
   X,
 } from "lucide-react";
+import { APP_VERSION } from "@/lib/version";
 
 const navigation = [
   {
@@ -151,7 +152,10 @@ export default function Sidebar() {
       {/* ── デスクトップ用サイドバー ── */}
       <div className="hidden md:flex w-64 bg-slate-900 min-h-screen flex-col shrink-0">
         <div className="p-6 border-b border-slate-700">
-          <h1 className="text-white font-bold text-lg">AI Writing</h1>
+          <div className="flex items-baseline gap-2">
+            <h1 className="text-white font-bold text-lg">AI Writing</h1>
+            <span className="text-slate-400 text-xs">v{APP_VERSION}</span>
+          </div>
           <p className="text-slate-400 text-xs mt-1">AIライティングツール</p>
         </div>
         <NavContent
@@ -171,6 +175,7 @@ export default function Sidebar() {
           <Menu size={22} />
         </button>
         <span className="text-white font-bold text-base">AI Writing</span>
+        <span className="text-slate-400 text-xs">v{APP_VERSION}</span>
       </div>
 
       {/* ── スマホ用ドロワー ── */}
@@ -185,7 +190,10 @@ export default function Sidebar() {
           <div className="md:hidden fixed top-0 left-0 h-full w-72 bg-slate-900 z-50 flex flex-col shadow-2xl">
             <div className="p-5 border-b border-slate-700 flex items-center justify-between">
               <div>
-                <h1 className="text-white font-bold text-lg">AI Writing</h1>
+                <div className="flex items-baseline gap-2">
+                  <h1 className="text-white font-bold text-lg">AI Writing</h1>
+                  <span className="text-slate-400 text-xs">v{APP_VERSION}</span>
+                </div>
                 <p className="text-slate-400 text-xs mt-0.5">AIライティングツール</p>
               </div>
               <button

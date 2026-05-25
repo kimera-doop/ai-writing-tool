@@ -21,11 +21,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ja" className={`${geist.variable} h-full`}>
-      <body className="h-full flex antialiased">
+    <html lang="ja" className={`${geist.variable} md:h-full`}>
+      <body className="md:h-full flex antialiased">
         <KeysProvider>
           <Sidebar />
-          <main className="flex-1 bg-gray-50 overflow-y-auto min-h-screen pt-14 md:pt-0">
+          <main className="flex-1 bg-gray-50 md:overflow-y-auto min-h-screen pt-14 md:pt-0">
             <UnlockModal />
             {children}
           </main>
