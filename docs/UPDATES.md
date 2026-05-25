@@ -2,6 +2,42 @@
 
 ---
 
+## ver 1.3 — スマホでのパスワード初期化バグ修正
+> 2026-05-25
+
+### ユーザー向け：何が変わったか
+
+#### 外部サイトから戻ってもパスワードが維持されるように修正
+スマホで外部サイト（Notionなど）に移動した後アプリに戻ると、マスターパスワードがリセットされてAPIキーが使えなくなる問題を修正しました。修正後は、同じタブを開き続けている限りパスワードを再入力する必要はありません。
+
+> タブを閉じて開き直した場合は、従来通りパスワードの再入力が必要です。
+
+### 開発者向け：変更ファイルと実装詳細
+
+**変更ファイル：** `lib/clientKeys.ts`、`components/KeysProvider.tsx`
+
+**原因：** 復号済みキーとマスターパスワードはJavaScriptのモジュール変数・React stateにのみ保持されていた。スマホブラウザは外部サイトへの移動時にページをリロードするため、メモリが消えてロック状態になっていた。
+
+**対策：** `sessionStorage` を復元用のバックアップとして追加。
+
+| 保存先 | 内容 | 消えるタイミング |
+|---|---|---|
+| `localStorage` | 暗号化済みキー | 手動削除時のみ |
+| `sessionStorage` | 復号済みキー＋パスワード | タブを閉じたとき |
+| メモリ変数 | 復号済みキー（キャッシュ） | ページリロード時 |
+
+**`lib/clientKeys.ts` の変更点**
+- `getGeminiKey()` / `getNotionToken()`：メモリになければ `sessionStorage` を参照するように変更
+- `setInMemoryGeminiKey()` / `setInMemoryNotionToken()`：メモリと同時に `sessionStorage` にも保存するように変更
+
+**`components/KeysProvider.tsx` の変更点**
+- `unlock()`：成功時に `sessionStorage` へパスワードを保存
+- `initMasterPassword()`：`sessionStorage` へパスワードを保存
+- `useEffect`：起動時に `sessionStorage` のパスワードが残っていれば自動復号・自動ロック解除
+- `removeGeminiKey()` / `removeNotionToken()`：全キー削除時に `sessionStorage` も合わせてクリア
+
+---
+
 ## ver 1.2 — Notion連携 UI 改善
 > 2026-05-25
 

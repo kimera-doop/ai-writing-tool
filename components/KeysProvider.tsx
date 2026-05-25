@@ -32,6 +32,9 @@ interface KeysContextValue {
 
 const KeysContext = createContext<KeysContextValue | null>(null);
 
+// sessionStorage キー（タブを閉じると消える）
+const SESSION_MASTER = "session_master_pw";
+
 export function KeysProvider({ children }: { children: ReactNode }) {
   const [masterPassword, setMasterPassword] = useState<string | null>(null);
   const [hasEncKeys, setHasEncKeys] = useState(false);
@@ -43,6 +46,26 @@ export function KeysProvider({ children }: { children: ReactNode }) {
     setHasEncKeys(has);
     setGeminiKeySet(!!localStorage.getItem(ENC_GEMINI_STORAGE));
     setNotionTokenSet(!!localStorage.getItem(ENC_NOTION_STORAGE));
+
+    // 外部サイトから戻った後など、sessionStorageにパスワードが残っていれば自動復元
+    if (has) {
+      const savedPw = sessionStorage.getItem(SESSION_MASTER);
+      if (savedPw) {
+        (async () => {
+          try {
+            const encGemini = localStorage.getItem(ENC_GEMINI_STORAGE);
+            const encNotion = localStorage.getItem(ENC_NOTION_STORAGE);
+            if (encGemini) setInMemoryGeminiKey(await decryptText(encGemini, savedPw));
+            if (encNotion) setInMemoryNotionToken(await decryptText(encNotion, savedPw));
+            setMasterPassword(savedPw);
+          } catch {
+            // パスワードが無効なら sessionStorage を削除
+            sessionStorage.removeItem(SESSION_MASTER);
+          }
+        })();
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // 暗号化キーが存在するがパスワードが未入力の状態 = ロック中
@@ -62,11 +85,12 @@ export function KeysProvider({ children }: { children: ReactNode }) {
         setInMemoryNotionToken(token);
       }
       setMasterPassword(password);
+      sessionStorage.setItem(SESSION_MASTER, password);
       return true;
     } catch {
-      // パスワードが違う場合はdecryptTextが例外を投げる
       setInMemoryGeminiKey(null);
       setInMemoryNotionToken(null);
+      sessionStorage.removeItem(SESSION_MASTER);
       return false;
     }
   };
@@ -74,6 +98,7 @@ export function KeysProvider({ children }: { children: ReactNode }) {
   /** 初回設定時：新しいマスターパスワードをメモリに保持 */
   const initMasterPassword = (password: string) => {
     setMasterPassword(password);
+    sessionStorage.setItem(SESSION_MASTER, password);
   };
 
   const saveGeminiKey = async (key: string) => {
@@ -98,14 +123,20 @@ export function KeysProvider({ children }: { children: ReactNode }) {
     localStorage.removeItem(ENC_GEMINI_STORAGE);
     setInMemoryGeminiKey(null);
     setGeminiKeySet(false);
-    if (!localStorage.getItem(ENC_NOTION_STORAGE)) setHasEncKeys(false);
+    if (!localStorage.getItem(ENC_NOTION_STORAGE)) {
+      setHasEncKeys(false);
+      sessionStorage.removeItem(SESSION_MASTER);
+    }
   };
 
   const removeNotionToken = () => {
     localStorage.removeItem(ENC_NOTION_STORAGE);
     setInMemoryNotionToken(null);
     setNotionTokenSet(false);
-    if (!localStorage.getItem(ENC_GEMINI_STORAGE)) setHasEncKeys(false);
+    if (!localStorage.getItem(ENC_GEMINI_STORAGE)) {
+      setHasEncKeys(false);
+      sessionStorage.removeItem(SESSION_MASTER);
+    }
   };
 
   return (

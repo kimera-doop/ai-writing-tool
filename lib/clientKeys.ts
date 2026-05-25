@@ -1,30 +1,52 @@
 "use client";
 
-// ブラウザのメモリ上にのみ保存（ページを閉じると消える）
+// ブラウザのメモリ上にキャッシュ（高速アクセス用）
 let _geminiKey: string | null = null;
 let _notionToken: string | null = null;
 
 export const ENC_GEMINI_STORAGE = "enc_gemini_key";
 export const ENC_NOTION_STORAGE = "enc_notion_token";
 
-/** 復号済みGemini APIキーをメモリから取得 */
+// sessionStorage キー（タブを閉じると消える）
+const SESSION_GEMINI = "session_gemini_key";
+const SESSION_NOTION = "session_notion_token";
+
+/** 復号済みGemini APIキーを取得（メモリ → sessionStorage の順で探す） */
 export function getGeminiKey(): string | null {
-  return _geminiKey;
+  if (_geminiKey) return _geminiKey;
+  if (typeof window !== "undefined") {
+    const val = sessionStorage.getItem(SESSION_GEMINI);
+    if (val) { _geminiKey = val; return val; }
+  }
+  return null;
 }
 
-/** 復号済みGemini APIキーをメモリにセット */
+/** 復号済みGemini APIキーをメモリとsessionStorageにセット */
 export function setInMemoryGeminiKey(key: string | null): void {
   _geminiKey = key;
+  if (typeof window !== "undefined") {
+    if (key) sessionStorage.setItem(SESSION_GEMINI, key);
+    else sessionStorage.removeItem(SESSION_GEMINI);
+  }
 }
 
-/** 復号済みNotionトークンをメモリから取得 */
+/** 復号済みNotionトークンを取得（メモリ → sessionStorage の順で探す） */
 export function getNotionToken(): string | null {
-  return _notionToken;
+  if (_notionToken) return _notionToken;
+  if (typeof window !== "undefined") {
+    const val = sessionStorage.getItem(SESSION_NOTION);
+    if (val) { _notionToken = val; return val; }
+  }
+  return null;
 }
 
-/** 復号済みNotionトークンをメモリにセット */
+/** 復号済みNotionトークンをメモリとsessionStorageにセット */
 export function setInMemoryNotionToken(token: string | null): void {
   _notionToken = token;
+  if (typeof window !== "undefined") {
+    if (token) sessionStorage.setItem(SESSION_NOTION, token);
+    else sessionStorage.removeItem(SESSION_NOTION);
+  }
 }
 
 /** localStorageに暗号化済みキーが存在するか確認 */
