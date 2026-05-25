@@ -6,9 +6,6 @@ const RATE_LIMIT = 60;
 const RATE_WINDOW_MS = 60 * 60 * 1000;
 const VALID_ID = /^[0-9a-f]{8}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{4}-?[0-9a-f]{12}$/i;
 
-// このDBでは使わないプロパティ名
-const EXCLUDED_PROPS = ["プロジェクト"];
-
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractTitle(properties: any): string {
   for (const prop of Object.values<any>(properties)) {
@@ -19,39 +16,74 @@ function extractTitle(properties: any): string {
   return "無題";
 }
 
-// プロパティ全体を「元ネタ」として使えるテキストに整形
+// 全プロパティ型に対応した汎用抽出（titleは除く）
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function extractContent(properties: any): string {
-  const lines: string[] = [];
-  for (const [key, prop] of Object.entries<any>(properties)) {
-    if (EXCLUDED_PROPS.includes(key)) continue;
-    if (prop.type === "title") continue; // タイトルは別途取得済み
+function extractAllProperties(properties: any): Array<{ name: string; type: string; value: string }> {
+  const result: Array<{ name: string; type: string; value: string }> = [];
 
-    if (prop.type === "rich_text") {
-      const text = prop.rich_text?.map((t: { plain_text: string }) => t.plain_text).join("").trim();
-      if (text) lines.push(`【${key}】\n${text}`);
-    } else if (prop.type === "multi_select") {
-      if (prop.multi_select?.length > 0) {
-        const values = prop.multi_select.map((s: { name: string }) => s.name).join("、");
-        lines.push(`【${key}】${values}`);
-      }
-    } else if (prop.type === "date") {
-      if (prop.date?.start) {
-        lines.push(`【${key}】${prop.date.start}`);
-      }
+  for (const [key, prop] of Object.entries<any>(properties)) {
+    if (prop.type === "title") continue;
+
+    let value = "";
+    switch (prop.type) {
+      case "rich_text":
+        value = prop.rich_text?.map((t: { plain_text: string }) => t.plain_text).join("").trim() ?? "";
+        break;
+      case "select":
+        value = prop.select?.name ?? "";
+        break;
+      case "multi_select":
+        value = prop.multi_select?.map((s: { name: string }) => s.name).join("、") ?? "";
+        break;
+      case "date":
+        if (prop.date?.start) {
+          value = prop.date.end ? `${prop.date.start} → ${prop.date.end}` : prop.date.start;
+        }
+        break;
+      case "number":
+        value = prop.number != null ? String(prop.number) : "";
+        break;
+      case "checkbox":
+        value = prop.checkbox ? "✓" : "✗";
+        break;
+      case "url":
+        value = prop.url ?? "";
+        break;
+      case "email":
+        value = prop.email ?? "";
+        break;
+      case "phone_number":
+        value = prop.phone_number ?? "";
+        break;
+      case "status":
+        value = prop.status?.name ?? "";
+        break;
+      case "people":
+        value = prop.people?.map((p: { name?: string }) => p.name ?? "").filter(Boolean).join("、") ?? "";
+        break;
+      default:
+        continue;
     }
+
+    if (value) result.push({ name: key, type: prop.type, value });
   }
-  return lines.join("\n\n");
+
+  return result;
 }
 
-// リスト表示用の短いスニペット
+// リスト表示用スニペット
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function extractSnippet(properties: any): string {
   for (const [key, prop] of Object.entries<any>(properties)) {
-    if (EXCLUDED_PROPS.includes(key)) continue;
     if (prop.type === "rich_text" && prop.rich_text?.length > 0) {
       const text = prop.rich_text.map((t: { plain_text: string }) => t.plain_text).join("").trim();
       if (text) return `${key}：${text.slice(0, 60)}`;
+    }
+    if (prop.type === "select" && prop.select?.name) {
+      return `${key}：${prop.select.name}`;
+    }
+    if (prop.type === "multi_select" && prop.multi_select?.length > 0) {
+      return `${key}：${prop.multi_select.map((s: { name: string }) => s.name).join("、")}`;
     }
   }
   return "";
@@ -94,7 +126,7 @@ export async function GET(request: NextRequest) {
       id: page.id,
       title: extractTitle(page.properties ?? {}),
       snippet: extractSnippet(page.properties ?? {}),
-      content: extractContent(page.properties ?? {}),
+      properties: extractAllProperties(page.properties ?? {}),
       url: page.url,
       createdAt: page.created_time,
     }));

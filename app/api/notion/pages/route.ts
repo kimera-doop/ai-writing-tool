@@ -33,16 +33,26 @@ export async function GET(request: NextRequest) {
       page_size: 30,
     });
 
+    // ワークスペース直下のページのみ表示（DB関連ページを完全に除外）
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pages = response.results.map((page: any) => {
+    const workspacePages = response.results.filter((page: any) =>
+      page.parent?.type === "workspace"
+    );
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const pages = workspacePages.map((page: any) => {
       let title = "無題";
-      const props = page.properties;
-      if (props?.title?.title?.[0]?.plain_text) {
-        title = props.title.title[0].plain_text;
-      } else if (props?.Name?.title?.[0]?.plain_text) {
-        title = props.Name.title[0].plain_text;
-      } else if (page.child_page?.title) {
+      // child_page ブロックのタイトルを優先
+      if (page.child_page?.title) {
         title = page.child_page.title;
+      } else if (page.properties) {
+        // プロパティ名ではなくtypeで探す
+        for (const prop of Object.values<any>(page.properties)) {
+          if (prop.type === "title" && prop.title?.length > 0) {
+            title = prop.title.map((t: { plain_text: string }) => t.plain_text).join("");
+            break;
+          }
+        }
       }
       return { id: page.id, title, url: page.url };
     });
