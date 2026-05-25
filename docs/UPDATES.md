@@ -2,6 +2,65 @@
 
 ---
 
+## ver 1.6 — Notionリセット後の表示が残る問題を修正
+> 2026-05-25
+
+### ユーザー向け：何が変わったか
+
+#### APIキーをリセットした後、Notion連携ページが自動でクリアされるように修正
+「APIキーをすべて削除してリセット」を実行した後、Notion連携ページに移動するとDBリストがそのまま表示され続ける問題を修正しました。リセット後はNotionページの内容も即座にクリアされます。
+
+### 開発者向け：変更ファイルと実装詳細
+
+**変更ファイル：** `app/notion/page.tsx`
+
+**原因：** Notionページコンポーネントは取得したDBリスト・ページ一覧をReact stateに保持する。リセット時に `KeysProvider` がトークンを削除しても、Notionページ側のstateには通知が届いていなかった。
+
+**対策：** `useKeys()` から `notionTokenSet` を購読し、`false` に変化したタイミングで全stateをリセットする `useEffect` を追加。
+
+```ts
+useEffect(() => {
+  if (notionTokenSet) return;
+  setDatabases([]); setPages([]); setSelectedDb(null);
+  setEntries([]); setSelectedEntry(null);
+  setView("db-list"); setActiveTab("databases"); setError("");
+}, [notionTokenSet]);
+```
+
+---
+
+## ver 1.5 — iOSのズーム・スクロール改善＋バージョン表示追加
+> 2026-05-25
+
+### ユーザー向け：何が変わったか
+
+#### 別タブから戻ったときに画面が拡大される問題を修正
+Notionなど外部サイトに移動してアプリに戻ると画面がズームされてしまう問題を修正しました。
+
+#### スクロールが引っかかる問題を修正
+スマホでスクロールがぎこちなく感じられる問題を修正しました。iOS Safariのネイティブスクロールが使われるようになり、スムーズに動作します。
+
+#### バージョン番号を表示
+サイドバーのタイトル「AI Writing」の横にバージョン番号（例：v1.5）が表示されるようになりました。アップデートのたびに番号が変わります。
+
+### 開発者向け：変更ファイルと実装詳細
+
+**変更ファイル：** `components/UnlockModal.tsx`、`app/layout.tsx`、`components/Sidebar.tsx`、`lib/version.ts`（新規）
+
+**ズーム修正：** `UnlockModal` の入力欄から `autoFocus` を削除。ページ復帰時に一瞬 `isLocked` が `true` になる際にiOS Safariが自動フォーカス→ズームしていた。
+
+**スクロール修正：** `html/body` の `h-full` と `main` の `overflow-y-auto` をスマホでは無効化（`md:` プレフィックスに変更）。スマホでは自然なページスクロールを使用し、デスクトップのみ固定レイアウトを維持。
+
+| クラス | 変更前 | 変更後 |
+|---|---|---|
+| `html` | `h-full` | `md:h-full` |
+| `body` | `h-full` | `md:h-full` |
+| `main` | `overflow-y-auto` | `md:overflow-y-auto` |
+
+**バージョン表示：** `lib/version.ts` にバージョン定数 `APP_VERSION` を追加。`Sidebar.tsx` のデスクトップサイドバー・スマホトップバー・スマホドロワーの3箇所で表示。
+
+---
+
 ## ver 1.4 — スマホでのページ更新時パスワードリセットを修正
 > 2026-05-25
 
