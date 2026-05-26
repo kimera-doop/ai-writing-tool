@@ -2,6 +2,27 @@
 
 ---
 
+## ver 1.11 — エージェントファイルの改行修正・設定ページのiPad Pro対応
+> 2026-05-26
+
+### ユーザー向け：何が変わったか
+
+#### iPad Pro / Nexus Hub サイズで設定ページがぺちゃんこになる問題を修正
+Googleデベロッパーツールで iPad Pro（1024px 幅）や Nexus Hub などのサイズに切り替えると、設定ページのカードが極端に狭くなる問題を修正しました。1280px 以上の画面でのみ2カラム表示になるように変更しました。
+
+### 開発者向け：変更ファイルと実装詳細
+
+**変更ファイル：** `app/settings/page.tsx`
+
+- 2カラムレイアウトのブレークポイントを `lg:` (1024px) → `xl:` (1280px) に変更（`lg:flex-row` → `xl:flex-row`、`lg:items-start` → `xl:items-start`、右カラムの `lg:min-w-135` → `xl:min-w-135`）
+- iPad Pro はちょうど1024px幅のため、`lg:` では2カラムが起動してしまい各カラムが極端に狭くなっていた
+
+**変更ファイル：** `.claude/agents/playwright-ui-reviewer.md`, `.claude/agents/nextjs-best-practices-reviewer.md`
+
+- `description` フィールドの `\\n` リテラルを YAML block scalar（`|-`）形式に変換。エージェントの説明文に `\n` という文字列が表示されていた問題を解消
+
+---
+
 ## ver 1.10 — 設定ページのモバイル表示を修正
 > 2026-05-26
 
