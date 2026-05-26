@@ -6,6 +6,7 @@ let _notionToken: string | null = null;
 
 export const ENC_GEMINI_STORAGE = "enc_gemini_key";
 export const ENC_NOTION_STORAGE = "enc_notion_token";
+export const SESSION_MASTER = "session_master_pw";
 
 // sessionStorage キー（タブを閉じると消える）
 const SESSION_GEMINI = "session_gemini_key";

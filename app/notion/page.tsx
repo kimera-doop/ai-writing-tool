@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   Database,
   FileText,
@@ -86,14 +87,14 @@ export default function NotionPage() {
   const [childPages, setChildPages] = useState<Array<{ id: string; title: string }>>([]);
   const [bodyExpanded, setBodyExpanded] = useState(false);
 
-  const getToken = () => {
+  const getToken = useCallback(() => {
     const token = getNotionToken();
     if (!token) {
       setError("Notion APIトークンが設定されていません。設定ページで入力してください。");
       return null;
     }
     return token;
-  };
+  }, []); // setError（useState setter）とgetNotionToken（import関数）は常に安定した参照
 
   // DB：5秒後サイレント再取得（Notion API反映待ち対応）
   const silentRefetch = useCallback(async () => {
@@ -127,8 +128,7 @@ export default function NotionPage() {
     } finally {
       setLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [silentRefetch]);
+  }, [silentRefetch, getToken]);
 
   // ページ一覧取得
   const fetchPages = useCallback(async () => {
@@ -147,8 +147,7 @@ export default function NotionPage() {
     } finally {
       setPagesLoading(false);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [getToken]);
 
   useEffect(() => {
     fetchDatabases();
@@ -156,16 +155,20 @@ export default function NotionPage() {
   }, [fetchDatabases]);
 
   // Notionトークンが削除されたとき（リセット時など）に表示をクリア
+  // useRefで前回値を記憶し、true→falseの変化時のみ動作させる（初回マウント時の誤発火防止）
+  const prevNotionTokenSet = useRef(notionTokenSet);
   useEffect(() => {
-    if (notionTokenSet) return;
-    setDatabases([]);
-    setPages([]);
-    setSelectedDb(null);
-    setEntries([]);
-    setSelectedEntry(null);
-    setView("db-list");
-    setActiveTab("databases");
-    setError("");
+    if (prevNotionTokenSet.current && !notionTokenSet) {
+      setDatabases([]);
+      setPages([]);
+      setSelectedDb(null);
+      setEntries([]);
+      setSelectedEntry(null);
+      setView("db-list");
+      setActiveTab("databases");
+      setError("");
+    }
+    prevNotionTokenSet.current = notionTokenSet;
   }, [notionTokenSet]);
 
   const handleTabChange = (tab: Tab) => {
@@ -314,7 +317,7 @@ export default function NotionPage() {
         <div className="mb-4 bg-red-50 border border-red-200 rounded-lg p-4 text-sm text-red-600">
           <p>{error}</p>
           {error.includes("設定") && (
-            <a href="/settings" className="underline mt-1 inline-block">設定ページへ →</a>
+            <Link href="/settings" className="underline mt-1 inline-block">設定ページへ →</Link>
           )}
         </div>
       )}

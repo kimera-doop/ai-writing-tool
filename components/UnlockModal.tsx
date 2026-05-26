@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Lock, Loader2 } from "lucide-react";
 import { useKeys } from "./KeysProvider";
-import { ENC_GEMINI_STORAGE, ENC_NOTION_STORAGE } from "@/lib/clientKeys";
+import { ENC_GEMINI_STORAGE, ENC_NOTION_STORAGE, SESSION_MASTER } from "@/lib/clientKeys";
 
 export default function UnlockModal() {
   const { isLocked, unlock } = useKeys();
@@ -75,6 +75,7 @@ export default function UnlockModal() {
               if (confirm("保存されているすべてのAPIキーが削除されます。リセットしてよいですか？\n\n※リセット後、設定画面でAPIキーを再登録してください。")) {
                 localStorage.removeItem(ENC_GEMINI_STORAGE);
                 localStorage.removeItem(ENC_NOTION_STORAGE);
+                localStorage.removeItem(SESSION_MASTER);
                 window.location.reload();
               }
             }}

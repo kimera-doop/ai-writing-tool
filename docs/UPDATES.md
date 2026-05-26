@@ -2,6 +2,42 @@
 
 ---
 
+## ver 1.7 — コード品質改善・バグ修正・バージョン管理の自動化
+> 2026-05-26
+
+### ユーザー向け：何が変わったか
+
+#### リセット後、複数タブを開いていても全タブが正しくリセットされるように修正
+「APIキーをすべて削除してリセット」を実行したとき、他のタブでアプリを開いていてもリセットが正しく反映されなかった問題を修正しました。
+
+#### 設定ページへのリンクがスムーズに遷移するように修正
+Notion連携でエラーが出たときに表示される「設定ページへ →」リンクが、ページ全体を読み直さずにスムーズに移動するようになりました。
+
+### 開発者向け：変更ファイルと実装詳細
+
+**変更ファイル：** `components/UnlockModal.tsx`、`lib/clientKeys.ts`、`components/KeysProvider.tsx`、`app/notion/page.tsx`、`lib/version.ts`、`next.config.ts`、`package.json`
+
+**リセット時の他タブ通知漏れ修正：**
+- `lib/clientKeys.ts` に `SESSION_MASTER = "session_master_pw"` を export 追加
+- `components/KeysProvider.tsx` でローカル定数を import に統一
+- `components/UnlockModal.tsx` のリセット処理に `localStorage.removeItem(SESSION_MASTER)` を追加（他タブへの合図となるキーの削除が抜けていた）
+
+**`<a>` → `next/link` に変更（`app/notion/page.tsx` L318）：**
+- 設定ページへのリンクがフルリロードを起こしていたため、SPA遷移に修正
+
+**Notionトークンリセット時のクリア処理の誤発火防止（`app/notion/page.tsx`）：**
+- `useRef` で前回の `notionTokenSet` 値を記憶し、`true → false` の変化時のみクリア処理が動くよう修正。初回マウント時に不要なクリアが走っていた問題を解消。
+
+**eslint-disable コメント解消（`app/notion/page.tsx`）：**
+- `getToken` 関数を `useCallback` でメモ化し、`fetchDatabases` / `fetchPages` の依存配列に正しく記載できるよう修正。`// eslint-disable-next-line` 2行を削除。
+
+**バージョン管理の自動化：**
+- `next.config.ts` で `package.json` の `version` フィールドを `NEXT_PUBLIC_APP_VERSION` 環境変数としてビルド時に埋め込む設定を追加
+- `lib/version.ts` が環境変数から読み取るよう変更
+- 次回以降は `package.json` の `version` を更新するだけでサイドバーのバージョン表示も自動で反映される
+
+---
+
 ## ver 1.6 — Notionリセット後の表示が残る問題を修正
 > 2026-05-25
 

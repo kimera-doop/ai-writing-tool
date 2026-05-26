@@ -11,6 +11,7 @@ import { encryptText, decryptText } from "@/lib/crypto";
 import {
   ENC_GEMINI_STORAGE,
   ENC_NOTION_STORAGE,
+  SESSION_MASTER,
   hasEncryptedKeys,
   setInMemoryGeminiKey,
   setInMemoryNotionToken,
@@ -31,9 +32,6 @@ interface KeysContextValue {
 }
 
 const KeysContext = createContext<KeysContextValue | null>(null);
-
-// localStorage キー（端末に永続保存）
-const SESSION_MASTER = "session_master_pw";
 
 export function KeysProvider({ children }: { children: ReactNode }) {
   const [masterPassword, setMasterPassword] = useState<string | null>(null);
