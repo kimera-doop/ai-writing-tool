@@ -119,7 +119,7 @@ export default function SettingsPage() {
 
       <div className="flex flex-col lg:flex-row gap-6 items-start">
       {/* 左カラム：設定フォーム群 */}
-      <div className="flex-1 min-w-0 lg:min-w-150 space-y-4">
+      <div className="flex-1 min-w-0 space-y-4">
 
         {/* ── マスターパスワード ── */}
         <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
@@ -231,7 +231,7 @@ export default function SettingsPage() {
             <button
               onClick={handleSaveGemini}
               disabled={!geminiInput.trim() || geminiSaving || !masterPassword}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed ${
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed whitespace-nowrap ${
                 geminiSaved
                   ? "bg-green-600 text-white"
                   : "bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white"
@@ -309,7 +309,7 @@ export default function SettingsPage() {
             <button
               onClick={handleSaveNotion}
               disabled={!notionInput.trim() || notionSaving || !masterPassword}
-              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed ${
+              className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors cursor-pointer disabled:cursor-not-allowed whitespace-nowrap ${
                 notionSaved
                   ? "bg-green-600 text-white"
                   : "bg-indigo-600 hover:bg-indigo-700 disabled:bg-indigo-300 text-white"
