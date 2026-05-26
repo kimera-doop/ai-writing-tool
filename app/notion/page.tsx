@@ -176,6 +176,7 @@ export default function NotionPage() {
     setError("");
     if (tab === "databases") {
       setView("db-list");
+      if (databases.length === 0) fetchDatabases();
     } else {
       setView("page-list");
       if (pages.length === 0) fetchPages();

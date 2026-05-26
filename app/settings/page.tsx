@@ -330,8 +330,8 @@ export default function SettingsPage() {
       </div>
 
       {/* 右カラム：セキュリティ説明＋リセット */}
-      <div className="flex-1 min-w-0 xl:min-w-135 space-y-4">
-        <div className="bg-blue-50 border border-blue-100 rounded-xl p-6 text-sm text-blue-700">
+      <div className="flex-1 min-w-0 space-y-4">
+        <div className="bg-blue-50 border border-blue-100 rounded-xl shadow-sm p-6 text-sm text-blue-700">
           <p className="font-semibold mb-2">セキュリティについて</p>
           <ul className="space-y-2 list-disc list-inside text-blue-600">
             <li>APIキーはAES-256で暗号化されてブラウザに保存されます</li>
