@@ -109,7 +109,7 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="p-4 md:p-8 max-w-5xl">
+    <div className="p-4 md:p-8 max-w-5xl w-full">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-900">設定</h1>
         <p className="text-gray-500 mt-1 text-sm">
@@ -117,7 +117,7 @@ export default function SettingsPage() {
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6 items-start">
+      <div className="flex flex-col lg:flex-row gap-6 lg:items-start">
       {/* 左カラム：設定フォーム群 */}
       <div className="flex-1 min-w-0 space-y-4">
 
@@ -226,7 +226,7 @@ export default function SettingsPage() {
               onChange={(e) => setGeminiInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSaveGemini()}
               placeholder={geminiKeySet ? "新しいキーを入力して上書き" : "AIzaSy..."}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono"
+              className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono"
             />
             <button
               onClick={handleSaveGemini}
@@ -304,7 +304,7 @@ export default function SettingsPage() {
               onChange={(e) => setNotionInput(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && handleSaveNotion()}
               placeholder={notionTokenSet ? "新しいトークンを入力して上書き" : "secret_..."}
-              className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono"
+              className="flex-1 min-w-0 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm font-mono"
             />
             <button
               onClick={handleSaveNotion}
